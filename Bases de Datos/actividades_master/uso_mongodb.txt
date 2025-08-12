@@ -1,0 +1,163 @@
+// Sección 2: Carga de datos
+
+mongoimport --verbose --db Proyecto --collection dataset1 --jsonArray C:\Users\nikol\Documents\a02\MOYANO_GONZALEZ_ALEJANDRO_actividad_1_dataset1.json
+mongoimport --verbose --db Proyecto --collection dataset2 --jsonArray C:\Users\nikol\Documents\a02\MOYANO_GONZALEZ_ALEJANDRO_actividad_1_dataset2.json
+mongoimport --verbose --db Proyecto --collection dataset3 --jsonArray C:\Users\nikol\Documents\a02\MOYANO_GONZALEZ_ALEJANDRO_actividad_1_dataset3.json
+
+
+
+// Sección 3: Exploración de colecciones
+
+db.dataset1.findOne()
+db.dataset2.findOne()
+db.dataset3.findOne()
+
+
+// a. Campos categóricos
+
+// Fichero 1
+db.dataset1.distinct("City") // Valores distintos del campo 'City'
+db.dataset1.distinct("OriginalCrimeTypeName") // Valores distintos del campo 'OriginalCrimeTypeName'
+
+// Fichero 2
+db.dataset2.distinct("alojamiento_tipo") // Valores distintos del campo 'alojamiento_tipo'
+db.dataset2.distinct("categoria") // Valores distintos del campo 'categoria'
+
+// Fichero 3
+db.dataset3.distinct("MOTIVO") // Valores distintos del campo 'MOTIVO'
+db.dataset3.distinct("DISEÑO") // Valores distintos del campo 'DISEÑO'
+
+// Colección más poblada (dataset2) 
+
+// b. Consulta básica con $gte y $lt
+db.getCollection('dataset2').find(
+  { cdpostal: { $gte: 28000, $lt: 29000 } },
+  { denominacion: 1, localidad: 1, _id: 0 }
+)
+
+// c. Consulta con $type y $exists
+db.getCollection('dataset2').find(
+  {
+    cdpostal: { $gte: 28000, $lt: 29000 },
+    denominacion: { $exists: true },
+    categoria: { $type: "string" }
+  },
+  { denominacion: 1, localidad: 1, categoria: 1, cdpostal: 1, _id: 0 }
+)
+
+// d. Consulta con .toArray()
+db.getCollection('dataset2').find(
+  {
+    cdpostal: { $gte: 28000, $lt: 29000 },
+    denominacion: { $exists: true },
+    categoria: { $type: "string" }
+  },
+  { denominacion: 1, localidad: 1, categoria: 1, cdpostal: 1, _id: 0 }
+).toArray()
+
+// e. Consulta con .forEach()
+db.getCollection('dataset2').find(
+  {
+    cdpostal: { $gte: 28000, $lt: 29000 },
+    denominacion: { $exists: true },
+    categoria: { $type: "string" }
+  },
+  { denominacion: 1, localidad: 1, categoria: 1, cdpostal: 1, _id: 0 }
+).forEach(function(valor, indice, array) {
+  print("Denominación: " + valor.denominacion +
+        ", Categoría: " + valor.categoria +
+        ", Código Postal: " + valor.cdpostal +
+        " (Registro No. " + indice + ")");
+})
+
+// Sección 4: Consultas en la colección 1 (dataset1)
+
+// a. Tamaño de la colección en bytes
+db.dataset1.dataSize()
+
+// b. Número de documentos en la colección
+db.dataset1.countDocuments()
+
+// c. Consulta con $lt y $gt
+db.dataset1.find(
+  { CrimeId: { $gt: 160900000, $lt: 160910000 } },
+  { CrimeId: 1, OriginalCrimeTypeName: 1, _id: 0 }
+)
+
+// d. Consulta con $and, $lte y $gte
+db.dataset1.find(
+  {
+    $and: [
+      { CrimeId: { $gte: 160900000 } },
+      { CrimeId: { $lte: 160910000 } }
+    ]
+  },
+  { CrimeId: 1, OriginalCrimeTypeName: 1, City: 1, _id: 0 }
+)
+
+// e. Agregación: Máximo, Mínimo y Promedio
+db.dataset1.aggregate([
+  {
+    $group: {
+      _id: null,
+      maxCrimeId: { $max: "$CrimeId" },
+      minCrimeId: { $min: "$CrimeId" },
+      avgCrimeId: { $avg: "$CrimeId" }
+    }
+  }
+])
+
+// f. Agrupación por variable categórica (City)
+db.dataset1.aggregate([
+  {
+    $group: {
+      _id: "$City",
+      total: { $sum: 1 }
+    }
+  },
+  { $sort: { total: -1 } }
+])
+
+// Sección 5: Consultas en la colección 2 (dataset2)
+
+// a. Tamaño de la colección en bytes
+db.dataset2.dataSize()
+
+// b. Número de documentos en la colección
+db.dataset2.countDocuments()
+
+// c. Consulta con $in
+db.dataset2.find(
+  { categoria: { $in: ["3-HOTEL", "2-HOSTAL", "4-HOTEL"] } },
+  { categoria: 1, denominacion: 1, _id: 0 }
+)
+
+// d. Consulta con Aggregate para campos tipo String
+db.dataset2.aggregate([
+  {
+    $project: {
+      alojamiento_tipo: { $cond: { if: { $eq: [{ $type: "$alojamiento_tipo" }, "string"] }, then: "$alojamiento_tipo", else: null } },
+      categoria: { $cond: { if: { $eq: [{ $type: "$categoria" }, "string"] }, then: "$categoria", else: null } },
+      denominacion: { $cond: { if: { $eq: [{ $type: "$denominacion" }, "string"] }, then: "$denominacion", else: null } }
+    }
+  }
+])
+
+// e. Consulta con múltiples operadores de agregación
+db.dataset2.aggregate([
+  { $match: { categoria: "3-HOTEL" } },
+  { $sort: { denominacion: 1 } },
+  { $project: { denominacion: 1, categoria: 1, _id: 0 } },
+  { $skip: 5 },
+  { $limit: 10 }
+])
+
+// f. Crear índices
+db.dataset2.createIndex({ categoria: 1, denominacion: 1 }) // Índice compuesto
+db.dataset2.createIndex({ categoria: 1 }) // Índice simple en categoria
+db.dataset2.createIndex({ cdpostal: 1 }) // Índice simple en cdpostal
+db.dataset2.createIndex({ localidad: 1 }) // Índice simple en localidad
+db.dataset2.createIndex({ denominacion: "text" }) // Índice de texto
+
+// g. Consulta con índice de texto
+db.dataset2.find({ $text: { $search: "LEGAZPI" } })
