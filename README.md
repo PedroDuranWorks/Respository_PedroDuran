@@ -10,7 +10,7 @@ Mi laboratorio personal de codigo: proyectos academicos, analisis de datos y exp
 |---|---|---|
 | [Machine Learning](./Machine%20Learning) | Notebooks de ML: arbol de decision, red neuronal para clasificacion de vino, Deep Learning | Python, Scikit-learn, TensorFlow |
 | [Visualizacion Datos](./Visualizacion%20Datos) | Dashboards: analisis de eventos culturales y analisis de marketing | Power BI, Tableau |
-| [Bases de Datos](./Bases%20de%20Datos) | Actividades y proyectos del Master sobre modelado y gestion de datos | SQL |
+| [Bases de Datos](./Bases%20de%20Datos) | Actividades y proyectos del Master sobre modelado y gestion de datos |MongoDB |
 | [TFG](./TFG) | Trabajo de Fin de Grado: **El Proceso de Poisson** - modelado matematico de procesos estocasticos | Python |
 | [TFM](./TFM) | Trabajo de Fin de Master: **Influencia de Variables en el Precio de las Habitaciones en Hoteles Espanoles** (Jul. 2025) | Python, Power BI |
 
